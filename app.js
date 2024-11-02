@@ -5,6 +5,7 @@ const cors = require('cors');
 const songRoutes = require('./routes/song');
 const yearsRoutes = require('./routes/years');
 const voiceRoutes = require('./routes/voice');
+const usersRoutes = require('./routes/users');
 const pool = require('./pool'); 
 
 
@@ -25,7 +26,7 @@ pool.connect((err) => {
   }
 });
 
-app.use(cors());
+app.use(cors({exposedHeaders: ['Content-Range']}));
 
 // Middleware pour le parsing JSON
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use(express.json());
 app.use('/years', yearsRoutes);
 app.use('/song', songRoutes);
 app.use('/voice', voiceRoutes);
+app.use('/users', usersRoutes);
 
 // Démarrage du serveur
 app.listen(PORT, () => {

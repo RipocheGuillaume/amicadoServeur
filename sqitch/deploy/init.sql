@@ -13,8 +13,8 @@ CREATE TABLE years (
 CREATE TABLE song (
     id SERIAL PRIMARY KEY,
     title VARCHAR(50) NOT NULL UNIQUE,
-    author VARCHAR(100) NOT NULL,
-    image VARCHAR(250) UNIQUE,
+    author VARCHAR(50) NOT NULL,
+    image VARCHAR(255) UNIQUE,
     "years_id" int NOT NULL REFERENCES "years"("id") ON DELETE CASCADE,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz
@@ -23,7 +23,7 @@ CREATE TABLE song (
 CREATE TABLE voice (
     id SERIAL PRIMARY KEY,
     voice VARCHAR(50) NOT NULL,
-    link VARCHAR(100) NOT NULL UNIQUE,
+    link VARCHAR(255) NOT NULL UNIQUE,
     "song_id" int NOT NULL REFERENCES "song"("id") ON DELETE CASCADE,
     created_at timestamptz NOT NULL DEFAULT now(),
     updated_at timestamptz

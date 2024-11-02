@@ -2,3 +2,4 @@
 %project=amicado
 
 init 2024-10-29T09:48:03Z ,,, <guillaume@Guillaume> # Initialisation de la base de données avec tables
+add-user 2024-11-02T11:26:05Z ,,, <guillaume@Guillaume> # add new table user
