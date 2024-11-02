@@ -1,0 +1,4 @@
+%syntax-version=1.0.0
+%project=amicado
+
+init 2024-10-29T09:48:03Z ,,, <guillaume@Guillaume> # Initialisation de la base de données avec tables
