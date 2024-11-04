@@ -8,30 +8,37 @@ router.get('/', async (req, res) => {
     // Filtrer les chansons en fonction de l'année
     const result = await pool.query(`
       SELECT 
-    song.id AS id, 
-    song.title, 
-    song.author,
-    song.image,
-    song.years_id,
-    COALESCE(
-      ARRAY_AGG(json_build_object(
-        'id', voice.id,
+  song.id,
+  song.title,
+  song.author,
+  song.image,
+  years.id AS years_id,
+  years.year,
+  COALESCE(
+    JSON_AGG(
+      json_build_object(
+        'voice_id', voice.id,
         'voice', voice.voice,
-        'link', voice.link,
-        'song_id', voice.song_id
-      )) FILTER (WHERE voice.id IS NOT NULL), 
-      '{}'::json[]
-    ) AS voice
-  FROM 
-    years 
-  LEFT JOIN 
-    song ON years.id = song.years_id
-  LEFT JOIN 
-    voice ON song.id = voice.song_id 
-  GROUP BY 
-    song.id, song.title, song.author, song.image, song.years_id
+        'link', voice.link
+      )
+    ) FILTER (WHERE voice.id IS NOT NULL),
+    '[]'::json
+  ) AS voice
+FROM 
+  song
+LEFT JOIN 
+  voice ON voice.song_id = song.id
+JOIN 
+  years ON years.id = song.years_id
+GROUP BY 
+  song.id, years.id
+
+      
     `);
-    res.setHeader('Content-Range', `song 0-${result.length - 1}/${result.length}`);
+    const totalCount = result.rows.length;
+
+    res.setHeader('Content-Range', `years 0-${totalCount - 1}/${totalCount}`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
     res.json(result.rows);
   } catch (error) {
     console.error('Erreur lors de la récupération des chansons', error);
@@ -40,16 +47,16 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
-  const yearId = req.params.id;
+  const {id} = req.params;
 
   try {
     // Filtrer les chansons en fonction de l'année
     const result = await pool.query(
-      'SELECT * FROM song WHERE years_id = $1', // Filtrer avec `years_id`
-      [yearId]
+      'SELECT * FROM song WHERE id = $1', // Filtrer avec `years_id`
+      [id]
     );
     res.setHeader('Content-Range', `song 0-${result.rows.length - 1}/${result.rows.length}`);
-    res.json(result.rows);
+    res.json(result.rows[0]);
   } catch (error) {
     console.error('Erreur lors de la récupération des chansons', error);
     res.status(500).json({ error: 'Erreur serveur' });

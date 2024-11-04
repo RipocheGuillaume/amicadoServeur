@@ -25,7 +25,10 @@ router.get('/', async (req, res) => {
       GROUP BY 
         years.id, years.year
     `);
-    res.setHeader('Content-Range', `years 0-${result.length - 1}/${result.length}`);
+    const totalCount = result.rows.length;
+
+    res.setHeader('Content-Range', `years 0-${totalCount - 1}/${totalCount}`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
     res.json(result.rows);
   } catch (error) {
     console.error('Erreur lors de la récupération de l\'année', error);

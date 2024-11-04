@@ -7,11 +7,30 @@ router.get('/', async (req, res) => {
     try {
       // Sélectionner les voix pour une chanson spécifique appartenant à une année donnée
       const result = await pool.query(
-        `SELECT * 
-FROM voice 
-JOIN song ON voice.song_id = song.id 
-JOIN years ON song.years_id = years.id`);
-    res.setHeader('Content-Range', `years 0-${result.length - 1}/${result.length}`);
+        `SELECT 
+  voice.id,
+  voice.voice,
+  voice.link,
+  voice.song_id,
+  voice.created_at,
+  voice.updated_at,
+  song.id AS song_id,
+  song.title,
+  song.author,
+  song.image,
+  song.years_id,
+  years.id AS years_id,
+  years.year
+FROM 
+  voice
+JOIN 
+  song ON voice.song_id = song.id
+JOIN 
+  years ON years.id = song.years_id`);
+    const totalCount = result.rows.length;
+
+    res.setHeader('Content-Range', `years 0-${totalCount - 1}/${totalCount}`);
+    res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
       res.json(result.rows);
     } catch (error) {
       console.error('Erreur lors de la récupération des voix', error);
@@ -27,11 +46,11 @@ router.get('/:id', async (req, res) => {
       // Sélectionner les voix pour une chanson spécifique appartenant à une année donnée
       const result = await pool.query(
         `SELECT * FROM voice 
-         WHERE song_id = $1`,
+         WHERE id = $1`,
         [id]
       );
       res.setHeader('Content-Range', `voice 0-${result.rows.length - 1}/${result.rows.length}`);
-      res.json(result.rows);
+      res.json(result.rows[0]);
     } catch (error) {
       console.error('Erreur lors de la récupération des voix', error);
       res.status(500).json({ error: 'Erreur serveur' });
@@ -48,6 +67,7 @@ router.post('/', async (req, res) => {
         'INSERT INTO voice (voice, link, song_id) VALUES ($1, $2, $3) RETURNING *',
         [voice, link, song_id]
       );
+      console.log(result)
       res.status(201).json(result.rows[0]);
     } catch (error) {
       console.error('Erreur lors de la création de la voix', error);
