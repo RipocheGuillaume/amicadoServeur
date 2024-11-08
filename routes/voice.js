@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../pool'); 
+const authenticateToken=require('../middelware/authenticateToken');
 
 router.get('/', async (req, res) => {
   
@@ -46,7 +47,7 @@ router.get('/:id', async (req, res) => {
       // Sélectionner les voix pour une chanson spécifique appartenant à une année donnée
       const result = await pool.query(
         `SELECT * FROM voice 
-         WHERE id = $1`,
+         WHERE id = $1 `,
         [id]
       );
       res.setHeader('Content-Range', `voice 0-${result.rows.length - 1}/${result.rows.length}`);
@@ -75,7 +76,7 @@ router.get('/:id', async (req, res) => {
     }
   });
 
-router.post('/', async (req, res) => {
+router.post('/',authenticateToken, async (req, res) => {
   console.log(req.body);
     const { voice, link,song_id } = req.body;
     // const { song_id } = req.params;
@@ -93,7 +94,7 @@ router.post('/', async (req, res) => {
     }
   });
 
-  router.delete('/:id', async (req, res) => {
+  router.delete('/:id',authenticateToken, async (req, res) => {
     const { id } = req.params;
     try {
       const result = await pool.query(
@@ -107,12 +108,12 @@ router.post('/', async (req, res) => {
     }
   });
 
-  router.put('/:id', async (req, res) => {
+  router.put('/:id',authenticateToken, async (req, res) => {
     const { id } = req.params;
     const {voice, link, song_id}= req.body
     try {
       const result = await pool.query(
-        'UPDATE voice SET voice = $1, link= $2, song_id= $3 WHERE id = $4',
+        'UPDATE voice SET voice = $1, link= $2, song_id= $3 WHERE id = $4 RETURNING *',
         [voice, link, song_id,id]
       );
       if (result.rowCount === 0) {

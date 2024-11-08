@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../pool'); 
+const authenticateToken=require('../middelware/authenticateToken');
 
 
 router.get('/', async (req, res) => {
@@ -32,11 +33,9 @@ JOIN
   years ON years.id = song.years_id
 GROUP BY 
   song.id, years.id
-
-      
     `);
     const totalCount = result.rows.length;
-
+      
     res.setHeader('Content-Range', `years 0-${totalCount - 1}/${totalCount}`);
     res.setHeader('Access-Control-Expose-Headers', 'Content-Range');
     res.json(result.rows);
@@ -51,10 +50,20 @@ router.get('/:id', async (req, res) => {
 
   try {
     // Filtrer les chansons en fonction de l'année
-    const result = await pool.query(
-      'SELECT * FROM song WHERE id = $1',
-      [id]
-    );
+    const result = await pool.query(`
+      SELECT 
+        song.id,
+        song.title,
+        song.author,
+        song.image,
+        years.id AS years_id,
+        years.year
+      FROM 
+        song
+      JOIN 
+        years ON years.id = song.years_id
+        WHERE song.id = $1
+    `,[id]);
     res.setHeader('Content-Range', `song 0-${result.rows.length - 1}/${result.rows.length}`);
     res.json(result.rows[0]);
   } catch (error) {
@@ -80,7 +89,7 @@ router.get('/years/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/',authenticateToken, async (req, res) => {
   const { title, author, image, years_id } = req.body;
   try {
     const result = await pool.query(
@@ -94,7 +103,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
@@ -108,12 +117,12 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   const {title,author,image,years_id}= req.body
   try {
     const result = await pool.query(
-      'UPDATE song SET title = $1, author= $2, image= $3, years_id= $4 WHERE id = $5',
+      'UPDATE song SET title = $1, author= $2, image= $3, years_id= $4 WHERE id = $5 RETURNING *',
       [title,author,image,years_id,id]
     );
     if (result.rowCount === 0) {

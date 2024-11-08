@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../pool'); 
+const authenticateToken=require('../middelware/authenticateToken');
 
 router.get('/', async (req, res) => {
   try {
@@ -48,7 +49,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/',authenticateToken, async (req, res) => {
   const { year } = req.body;
   try {
     const result = await pool.query(
@@ -62,12 +63,12 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   const {year}= req.body
   try {
     const result = await pool.query(
-      'UPDATE years SET year = $1 WHERE id = $2',
+      'UPDATE years SET year = $1 WHERE id = $2 RETURNING *',
       [year,id]
     );
     res.status(201).json(result.rows[0]);
@@ -77,7 +78,7 @@ router.put('/:id', async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(

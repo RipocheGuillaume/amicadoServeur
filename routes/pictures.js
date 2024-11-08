@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../pool'); 
+const authenticateToken=require('../middelware/authenticateToken');
+
 
 //Liste de tous les photos
 router.get('/', async (req, res) => {
@@ -58,7 +60,7 @@ router.get('/:id', async (req, res) => {
 
 
 //Création d'une photo
-router.post('/', async (req, res) => {
+router.post('/',authenticateToken, async (req, res) => {
   const { title,url,event_id } = req.body;
   try {
     const result = await pool.query(
@@ -73,7 +75,7 @@ router.post('/', async (req, res) => {
 });
 
 //Suppression d'une photo
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   try {
     const result = await pool.query(
@@ -92,7 +94,7 @@ router.delete('/:id', async (req, res) => {
 
 
 //Modification d'une photo
-router.patch('/:id', async (req, res) => {
+router.patch('/:id',authenticateToken, async (req, res) => {
   const { id } = req.params;
   const {title,url}= req.body
   try {
