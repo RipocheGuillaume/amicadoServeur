@@ -57,6 +57,24 @@ router.get('/:id', async (req, res) => {
     }
   });
 
+  router.get('/song/:id', async (req, res) => {
+    const {id} = req.params;
+  
+    try {
+      // Sélectionner les voix pour une chanson spécifique appartenant à une année donnée
+      const result = await pool.query(
+        `SELECT * FROM voice 
+         WHERE song_id = $1`,
+        [id]
+      );
+      res.setHeader('Content-Range', `voice 0-${result.rows.length - 1}/${result.rows.length}`);
+      res.json(result.rows);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des voix', error);
+      res.status(500).json({ error: 'Erreur serveur' });
+    }
+  });
+
 router.post('/', async (req, res) => {
   console.log(req.body);
     const { voice, link,song_id } = req.body;

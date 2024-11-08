@@ -52,11 +52,28 @@ router.get('/:id', async (req, res) => {
   try {
     // Filtrer les chansons en fonction de l'année
     const result = await pool.query(
-      'SELECT * FROM song WHERE id = $1', // Filtrer avec `years_id`
+      'SELECT * FROM song WHERE id = $1',
       [id]
     );
     res.setHeader('Content-Range', `song 0-${result.rows.length - 1}/${result.rows.length}`);
     res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erreur lors de la récupération des chansons', error);
+    res.status(500).json({ error: 'Erreur serveur' });
+  }
+});
+
+router.get('/years/:id', async (req, res) => {
+  const {id} = req.params;
+
+  try {
+    // Filtrer les chansons en fonction de l'année
+    const result = await pool.query(
+      'SELECT * FROM song WHERE years_id = $1',
+      [id]
+    );
+    res.setHeader('Content-Range', `song 0-${result.rows.length - 1}/${result.rows.length}`);
+    res.json(result.rows);
   } catch (error) {
     console.error('Erreur lors de la récupération des chansons', error);
     res.status(500).json({ error: 'Erreur serveur' });

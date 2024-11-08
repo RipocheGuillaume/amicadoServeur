@@ -6,6 +6,8 @@ const songRoutes = require('./routes/song');
 const yearsRoutes = require('./routes/years');
 const voiceRoutes = require('./routes/voice');
 const usersRoutes = require('./routes/users');
+const eventsRoutes = require('./routes/events');
+const picturesRoutes = require('./routes/pictures');
 const pool = require('./pool'); 
 
 
@@ -36,6 +38,8 @@ app.use('/years', yearsRoutes);
 app.use('/song', songRoutes);
 app.use('/voice', voiceRoutes);
 app.use('/users', usersRoutes);
+app.use('/events', eventsRoutes);
+app.use('/pictures', picturesRoutes)
 
 // Démarrage du serveur
 app.listen(PORT, () => {
