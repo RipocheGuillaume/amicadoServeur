@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    
+    console.log(token);  
     if (!token) return res.sendStatus(401).json({message:"Token manquant"}); // Non autorisé si aucun token
   
     jwt.verify(token, process.env.SECRET_KEY, (err, user) => {
